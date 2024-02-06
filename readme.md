@@ -14,6 +14,11 @@ Welcome to the README for the Decline Curve Analysis (DCA) project conducted at 
 2. Leveraged Python for intricate data analysis and model implementation.
 3. Optimized data acquisition processes, ensuring real-time and cost-efficient updates for pivotal inputs.
 
+## Possible Future Updates:
+Integration of additional data sources to further enhance the accuracy of production forecasts.
+Implementation of advanced machine learning algorithms to explore more complex patterns in production data.
+Enhancement of the GUI to include more interactive features and customization options for users.
+
 ## Libraries Used:
 The project extensively utilized Python libraries, including but not limited to:
 
