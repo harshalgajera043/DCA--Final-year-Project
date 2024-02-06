@@ -4,10 +4,10 @@
 Welcome to the README for the Decline Curve Analysis (DCA) project conducted at PDEU from January to May 2023. This project focused on developing a Python-based DCA model for optimizing oil production, emphasizing production forecast.
 
 ## Project Overview:
-Forecasting Model: Managed a six-member team to develop a predictive model utilizing ensemble machine learning techniques, including regression and stacking, for enhanced accuracy in production forecasting.
-Web Scraping: Implemented web scraping for real-time crude prices, resulting in a 15% increase in update speed and potential annual cost savings of $2M.
-Algorithmic Analysis: Applied ensemble machine learning techniques to analyze historical production data and optimize oil production strategies.
-Graphical User Interface (GUI): Designed and implemented a user-friendly GUI to facilitate seamless interaction with the DCA model.
+1. Forecasting Model: Managed a six-member team to develop a predictive model utilizing ensemble machine learning techniques, including regression and stacking, for enhanced accuracy in production forecasting.
+2. Web Scraping: Implemented web scraping for real-time crude prices, resulting in a 15% increase in update speed and potential annual cost savings of $2M.
+3. Algorithmic Analysis: Applied ensemble machine learning techniques to analyze historical production data and optimize oil production strategies.
+4. Graphical User Interface (GUI): Designed and implemented a user-friendly GUI to facilitate seamless interaction with the DCA model.
 
 ## Key Achievements:
 1. Demonstrated effective leadership and collaboration within a multidisciplinary team.
