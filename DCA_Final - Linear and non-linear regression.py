@@ -70,8 +70,6 @@ def generate_dca_random_forest(df):
     return model, X_test, y_test
 
 def forecast_future_production(df, linear_model, rf_model):
-    # df contains a time-series of historical production data and you want to forecast future oil production
-    # Extract the relevant columns for time-series analysis
     time_series_data = df[['DATE', 'BORE_OIL_VOL']]
     
     time_series_data['DATE'] = pd.to_datetime(time_series_data['DATE'])
@@ -82,9 +80,8 @@ def forecast_future_production(df, linear_model, rf_model):
 
     # Generate forecast using Random Forest model
     rf_forecast = rf_model.predict(time_series_data[['LIQ_VOL', 'BORE_GAS_VOL']])
-
-    # Combine forecasts from both models (you can choose any method to combine the forecasts)
-    combined_forecast = (linear_forecast + rf_forecast) / 2  # Taking the average of predictions
+    
+    combined_forecast = (linear_forecast + rf_forecast) / 2 
 
     print("Combined Forecasted Production:")
     print(combined_forecast)
