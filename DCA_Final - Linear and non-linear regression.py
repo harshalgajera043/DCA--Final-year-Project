@@ -129,8 +129,11 @@ def web_scrape_crude_price():
 def estimate_revenue(forecasted_production, current_crude_price):
     # Calculate revenue generated based on forecasted production and current crude oil price
     revenue = forecasted_production * current_crude_price
+    if revenue>=0:
+        return revenue
+    else:
+        print('Revenue forecast unable')
     
-    return revenue
 #----------------------------GUI SET-UP----------------------------#
 window = Tk()
 # window.minsize(width=500, height=450)
