@@ -32,22 +32,17 @@ def generate_dca_linear_regression(df):
     import warnings
     warnings.filterwarnings("ignore")
     
-    # Fill empty values with zeros
     df = df.fillna(0)
     print(df.describe().T)
     print(df.columns)
     
-    # Define features and target variables
     X = df[['LIQ_VOL']]
     y = df['AVG_DOWNHOLE_PRESSURE']
     
     # Perform train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    # Create ML model to predict GLR
     model = LinearRegression()
-    
-    # Train the model
     model.fit(X_train, y_train)
 
     # Return the trained Linear Regression model and test data for evaluation
@@ -58,38 +53,28 @@ def generate_dca_random_forest(df):
     import warnings
     warnings.filterwarnings("ignore")
     
-    # Fill empty values with zeros
     df = df.fillna(0)
     print(df.describe().T)
     print(df.columns)
-    
-    # Define features and target variables
+
     X = df[['LIQ_VOL', 'BORE_GAS_VOL']]
     y = df['BORE_OIL_VOL']
     
     # Perform train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # Create ML model to predict GLR
+
     model = RandomForestRegressor()
-    
-    # Train the model
     model.fit(X_train, y_train)
 
     # Return the trained Random Forest model and test data for evaluation
     return model, X_test, y_test
 
 def forecast_future_production(df, linear_model, rf_model):
-    # Assuming df contains a time-series of historical production data
-    # and you want to forecast future oil production
-
+    # df contains a time-series of historical production data and you want to forecast future oil production
     # Extract the relevant columns for time-series analysis
-    time_series_data = df[['DATE', 'BORE_OIL_VOL']]  # Adjust column names as per your dataset
-
-    # Convert the 'DATE' column to datetime if it's not already in datetime format
+    time_series_data = df[['DATE', 'BORE_OIL_VOL']]
+    
     time_series_data['DATE'] = pd.to_datetime(time_series_data['DATE'])
-
-    # Set 'DATE' column as index
     time_series_data.set_index('DATE', inplace=True)
 
     # Generate forecast using Linear Regression model
@@ -101,11 +86,8 @@ def forecast_future_production(df, linear_model, rf_model):
     # Combine forecasts from both models (you can choose any method to combine the forecasts)
     combined_forecast = (linear_forecast + rf_forecast) / 2  # Taking the average of predictions
 
-    # Print or return the combined forecasted values
     print("Combined Forecasted Production:")
     print(combined_forecast)
-
-    # visualize the forecasted values
     plt.plot(time_series_data.index, time_series_data['BORE_OIL_VOL'], label='Historical Production')
     plt.plot(time_series_data.index, combined_forecast, label='Combined Forecasted Production', linestyle='--')
     plt.xlabel('Date')
@@ -118,10 +100,9 @@ def web_scrape_crude_price():
     url = "Add price website here"  # Replace this with the actual URL for scraping crude oil prices
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-    # Example: Find the element containing crude oil price and extract the text
     price_element = soup.find("div", class_="crude-price")
     if price_element:
-        crude_price = price_element.text.strip()  # Assuming the price is in text format
+        crude_price = price_element.text.strip()
         return crude_price
     else:
         return "Price Not Available"
@@ -173,15 +154,10 @@ def Generate_DCA():
 
     # Generate DCA using random forest
     rf_model, rf_X_test, rf_y_test = generate_dca_random_forest(df)
-
-    # Forecast future production
-    forecast_future_production(df, linear_model, rf_model)
-
-    # Scrape current crude oil price
+    
+    forecast_future_production(df, linear_model, rf_model)    # Forecast future production
+    
     current_crude_price = web_scrape_crude_price()
-
-    # Combine forecasts from both models (you can choose any method to combine the forecasts)
-    # Here, we'll simply take the average of the forecasts
     combined_forecast = (df['Linear_Forecast'] + df['RF_Forecast']) / 2
 
     # Add the combined forecast to the dataframe
@@ -190,8 +166,6 @@ def Generate_DCA():
     # Estimate revenue based on the forecasted production and current crude oil price
     forecasted_production = combined_forecast.iloc[-1]  # Get the last forecasted production value
     revenue = estimate_revenue(forecasted_production, current_crude_price)
-
-    # Describe the estimated revenue
     print(f"The estimated revenue generated based on the forecasted production and current crude oil price is ${revenue}.")
 
 
