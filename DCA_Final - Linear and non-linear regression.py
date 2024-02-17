@@ -5,6 +5,8 @@ import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from tkinter import *
+import requests
+from bs4 import BeautifulSoup
 
 BG_COLOR = "#9BA4B5"
 FONT = ("Arial", 14, "bold")
@@ -25,139 +27,111 @@ def split_data_set(value):
     else:
         return 0.4
 
-def generate_dca(df):
+def generate_dca_linear_regression(df):
+    # Your existing code for decline curve analysis with Linear Regression
     import warnings
     warnings.filterwarnings("ignore")
-
-    # let's fill empty values with zeros
+    
+    # Fill empty values with zeros
     df = df.fillna(0)
     print(df.describe().T)
     print(df.columns)
-
-    # Ploted Average downhole Pressure and WI rate in one plot with subplot and twinx()
-    plt.rcParams["figure.autolayout"] = True
-
-    ax1 = plt.subplot()
-    l1, = ax1.plot(df.index, df["AVG_DOWNHOLE_PRESSURE"], color="green")
-
-    ax2 = ax1.twinx()
-    l2, = ax2.plot(df.index, df["BORE_GAS_VOL"], alpha=0.3, color="blue")
-
-    plt.legend([l1, l2], ["AVG_DOWNHOLE_PRESSURE", "BORE_GAS_VOL"])
-
-    plt.show()
-
-    df["AVG_DOWNHOLE_PRESSURE"].replace(0, np.random.randint(240, 260), inplace=True)
-    df["BORE_GAS_VOL"].replace(0, np.random.randint(4500, 6000), inplace=True)
-    df["BORE_WAT_VOL"].replace(0, df["BORE_WAT_VOL"].median(), inplace=True)
-    df["BORE_OIL_VOL"].replace(0, df["BORE_OIL_VOL"].median(), inplace=True)
-    # df.replace(0, df.median(), inplace=True)
-
+    
+    # Define features and target variables
+    X = df[['LIQ_VOL']]
+    y = df['AVG_DOWNHOLE_PRESSURE']
+    
+    # Perform train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
     # Create ML model to predict GLR
+    model = LinearRegression()
+    
+    # Train the model
+    model.fit(X_train, y_train)
 
-    df["LIQ_VOL"] = df["BORE_OIL_VOL"] + df["BORE_WAT_VOL"]
+    # Return the trained Linear Regression model and test data for evaluation
+    return model, X_test, y_test
 
-    sns.scatterplot(x=df["LIQ_VOL"], y=df["AVG_DOWNHOLE_PRESSURE"])
-    plt.show()
+def generate_dca_random_forest(df):
+    # Your existing code for decline curve analysis with Random Forest
+    import warnings
+    warnings.filterwarnings("ignore")
+    
+    # Fill empty values with zeros
+    df = df.fillna(0)
+    print(df.describe().T)
+    print(df.columns)
+    
+    # Define features and target variables
+    X = df[['LIQ_VOL', 'BORE_GAS_VOL']]
+    y = df['BORE_OIL_VOL']
+    
+    # Perform train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # Create ML model to predict GLR
+    model = RandomForestRegressor()
+    
+    # Train the model
+    model.fit(X_train, y_train)
 
-    length = len(df)
-    print(length)
+    # Return the trained Random Forest model and test data for evaluation
+    return model, X_test, y_test
 
-    split = var.get()
-    print(split)
+def forecast_future_production(df, linear_model, rf_model):
+    # Assuming df contains a time-series of historical production data
+    # and you want to forecast future oil production
 
-    split_at = round(length * (1-split_data_set(split)))
-    print(split_at)
+    # Extract the relevant columns for time-series analysis
+    time_series_data = df[['DATE', 'BORE_OIL_VOL']]  # Adjust column names as per your dataset
 
-    x_train = df[["LIQ_VOL"]][:split_at]
-    y_train = df[["AVG_DOWNHOLE_PRESSURE"]][:split_at]
-    x_test = df[["LIQ_VOL"]][split_at:]
-    y_test = df[["AVG_DOWNHOLE_PRESSURE"]][split_at:]
+    # Convert the 'DATE' column to datetime if it's not already in datetime format
+    time_series_data['DATE'] = pd.to_datetime(time_series_data['DATE'])
 
+    # Set 'DATE' column as index
+    time_series_data.set_index('DATE', inplace=True)
 
-    plt.scatter(x_train, y_train)
-    plt.scatter(x_test, y_test)
-    plt.show()
+    # Generate forecast using Linear Regression model
+    linear_forecast = linear_model.predict(time_series_data[['LIQ_VOL']])
 
-    # Predicting the oil and water production rate using ML algorithms
+    # Generate forecast using Random Forest model
+    rf_forecast = rf_model.predict(time_series_data[['LIQ_VOL', 'BORE_GAS_VOL']])
 
-    fig, ax = plt.subplots(2, 1, sharex="col", sharey="row")
+    # Combine forecasts from both models (you can choose any method to combine the forecasts)
+    combined_forecast = (linear_forecast + rf_forecast) / 2  # Taking the average of predictions
 
-    ax[0].plot(df.index, df["BORE_OIL_VOL"], color="orange")
-    ax[1].plot(df.index, df["BORE_WAT_VOL"], color="blue")
-    plt.show()
+    # Print or return the combined forecasted values
+    print("Combined Forecasted Production:")
+    print(combined_forecast)
 
-
-    # split data into training and testing sets
-    x1_train = df[["AVG_DOWNHOLE_PRESSURE", "BORE_GAS_VOL"]][:split_at]
-    y1_train = df[["BORE_OIL_VOL"]][:split_at]
-    x1_test = df[["AVG_DOWNHOLE_PRESSURE", "BORE_GAS_VOL"]][split_at:]
-    y1_test = df[["BORE_OIL_VOL"]][split_at:]
-
-    # model = LinearRegression()
-    # model.fit(x1_train, y1_train)
-    #
-    # yp_test = model.predict(x1_test)
-    # print(yp_test)
-
-    #Random forest for regression
-    clf = RandomForestRegressor()
-
-    # train the model
-    clf.fit(x1_train, y1_train)
-
-    # predict on test data
-    predict_1 = clf.predict(x1_test)
-    print(f"Prediction is {predict_1}")
-
-    plt.plot(df.index[split_at:], predict_1, color="red", label="Predicted")
-    plt.plot(df.index[split_at:], y1_test, color="green", label="Actual")
+    # Optionally, you can visualize the forecasted values
+    plt.plot(time_series_data.index, time_series_data['BORE_OIL_VOL'], label='Historical Production')
+    plt.plot(time_series_data.index, combined_forecast, label='Combined Forecasted Production', linestyle='--')
+    plt.xlabel('Date')
+    plt.ylabel('Oil Production')
+    plt.title('Forecasted Oil Production')
     plt.legend()
-
-    # Label to axis
-    plt.xlabel("DATEPRD", color= "blue")
-    plt.ylabel("Oil Production Rate", color="blue")
-
-    plt.title("Comparision between Predicted oil Prod rate and Actual Oil Prod rate", size=12, color="blue")
     plt.show()
 
-    # water
+def web_scrape_crude_price():
+    url = "Add price website here"  # Replace this with the actual URL for scraping crude oil prices
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    # Example: Find the element containing crude oil price and extract the text
+    price_element = soup.find("div", class_="crude-price")
+    if price_element:
+        crude_price = price_element.text.strip()  # Assuming the price is in text format
+        return crude_price
+    else:
+        return "Price Not Available"
 
-    x2_train = df[["AVG_DOWNHOLE_PRESSURE", "BORE_WAT_VOL"]][:split_at]
-    y2_train = df[["BORE_WAT_VOL"]][:split_at]
-    x2_test = df[["AVG_DOWNHOLE_PRESSURE", "BORE_WAT_VOL"]][split_at:]
-    y2_test = df[["BORE_WAT_VOL"]][split_at:]
-
-    # Linear Regression Used
-    # model_2 = LinearRegression()
-    # model_2.fit(x2_train, y2_train)
-    #
-    # yp_test_2 = model_2.predict(x2_test)
-
-    # RandomForest Used
-    clf = RandomForestRegressor()
-
-    # train the model
-    clf.fit(x2_train, y2_train)
-
-    # predict on test data
-    predict = clf.predict(x2_test)
-    print(f"Prediction is {predict}")
-
-
-    # plt.plot(df.index[2000:], yp_test_2, color="red", label="Predicted")  # use for linear regression
-    plt.plot(df.index[split_at:], predict, color="red", label="Predicted")  # use for non-linear regression using random forest
-    plt.plot(df.index[split_at:], y2_test, color="green", label="Actual")
-    plt.legend()
-
-    plt.xlabel("DATEPRD", color="blue")
-    plt.ylabel("Water Production Rate", color="blue")
-
-    plt.title("Comparision between Predicted water Prod rate and Actual water Prod rate", size=12, color="blue")
-    plt.show()
-
+def estimate_revenue(forecasted_production, current_crude_price):
+    # Calculate revenue generated based on forecasted production and current crude oil price
+    revenue = forecasted_production * current_crude_price
+    
+    return revenue
 #----------------------------GUI SET-UP----------------------------#
-
 window = Tk()
 # window.minsize(width=500, height=450)
 window.title("Decline Curve Analysis")
@@ -184,7 +158,6 @@ Radiobutton(window, text="65-35 Split", variable=var, value=4, bg=BG_COLOR,font=
 Radiobutton(window, text="60-40 Split", variable=var, value=5, bg=BG_COLOR,font=FONT_1).grid(column=0, row=8, columnspan=2)
 Radiobutton(window, text="55-45 Split", variable=var, value=6, bg=BG_COLOR,font=FONT_1).grid(column=0, row=9, columnspan=2)
 
-
 def Generate_DCA():
     global file_path
     # csv_path = "/Users/hgaje/PycharmProjects/DCA_prectice/monthly-production-data.csv"
@@ -192,10 +165,34 @@ def Generate_DCA():
     csv_file = file_path.get()
     df = pd.read_csv(csv_file)
 
+    # Generate DCA using linear regression
+    linear_model, linear_X_test, linear_y_test = generate_dca_linear_regression(df)
 
-    generate_dca(df)
+    # Generate DCA using random forest
+    rf_model, rf_X_test, rf_y_test = generate_dca_random_forest(df)
 
+    # Forecast future production
+    forecast_future_production(df, linear_model, rf_model)
 
+    # Scrape current crude oil price
+    current_crude_price = web_scrape_crude_price()
+
+    # Combine forecasts from both models (you can choose any method to combine the forecasts)
+    # Here, we'll simply take the average of the forecasts
+    combined_forecast = (df['Linear_Forecast'] + df['RF_Forecast']) / 2
+
+    # Add the combined forecast to the dataframe
+    df['Combined_Forecast'] = combined_forecast
+
+    # Estimate revenue based on the forecasted production and current crude oil price
+    forecasted_production = combined_forecast.iloc[-1]  # Get the last forecasted production value
+    revenue = estimate_revenue(forecasted_production, current_crude_price)
+
+    # Describe the estimated revenue
+    print(f"The estimated revenue generated based on the forecasted production and current crude oil price is ${revenue}.")
+
+    # Optionally, you can display or visualize the modified dataframe with the combined forecast column
+    print(df.head())
 
 # Label().grid(column=0, row=4)
 
