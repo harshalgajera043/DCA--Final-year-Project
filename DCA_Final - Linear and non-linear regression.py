@@ -105,7 +105,7 @@ def forecast_future_production(df, linear_model, rf_model):
     print("Combined Forecasted Production:")
     print(combined_forecast)
 
-    # Optionally, you can visualize the forecasted values
+    # visualize the forecasted values
     plt.plot(time_series_data.index, time_series_data['BORE_OIL_VOL'], label='Historical Production')
     plt.plot(time_series_data.index, combined_forecast, label='Combined Forecasted Production', linestyle='--')
     plt.xlabel('Date')
@@ -194,8 +194,6 @@ def Generate_DCA():
     # Describe the estimated revenue
     print(f"The estimated revenue generated based on the forecasted production and current crude oil price is ${revenue}.")
 
-    # Optionally, you can display or visualize the modified dataframe with the combined forecast column
-    print(df.head())
 
 # Label().grid(column=0, row=4)
 
