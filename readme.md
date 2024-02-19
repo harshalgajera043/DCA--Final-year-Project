@@ -1,7 +1,7 @@
 # Decline Curve Analysis using Python
 
 ## Project Introduction:
-Welcome to the README for the Decline Curve Analysis (DCA) project conducted at PDEU from January to May 2023. This project focused on developing a Python-based DCA model for optimizing oil production, emphasizing production forecast.
+Welcome to the README for the Decline Curve Analysis (DCA) project conducted at PDEU from January to May 2023. This project focused on developing a Python-based DCA model for optimizing oil production, emphasizing production forecasts contributing towards reducing energy consumption towards energy production.
 
 ## Project Overview:
 1. Forecasting Model: Managed a six-member team to develop a predictive model utilizing ensemble machine learning techniques, including regression and stacking, for enhanced accuracy in production forecasting.
